@@ -1,64 +1,28 @@
-# # Server
-# import hug
-# from hug_middleware_cors import CORSMiddleware
-#
-# # Python
-# import os
-# import sys
-# import json
-#
-# # Logging
-# import logging
-# logging.basicConfig(level=logging.INFO)
-#
-#
-# api = hug.API(__name__)
-# api.http.add_middleware(CORSMiddleware(api, allow_origins=["*"]))
-#
-# # Port: 4567
-#
-#
-# @hug.post('/deploy')
-# def deploy(*args, **kwargs):
-#     print("Deploy called")
-#
-#     with open("/tmp/webhook.json", "w+") as dest:
-#         dest.write(json.dumps({
-#             "args": args,
-#             "kwargs": kwargs
-#         }))
-#
-#     return {"ok": True}
-#
-
-print("Starting CI server")
-
 # Server
 import hug
 from hug_middleware_cors import CORSMiddleware
 
 # Python
-import json
+from datetime import datetime
 
 # Logging
 import logging
 logging.basicConfig(level=logging.INFO)
 
-api = hug.API(__name__)
-api.http.add_middleware(CORSMiddleware(api))
 
-print("API: %s" % api)
-print("CORSMiddleware: %s" % CORSMiddleware)
+api = hug.API(__name__)
+api.http.add_middleware(CORSMiddleware(api, allow_origins=["https://github.com"]))
 
 
 @hug.post('/deploy')
 def deploy(*args, **kwargs):
-    print("Deploy called")
+    print("New Deploy at %s" % datetime.now())
+    try:
+        print("Args: %s" % args)
+        print("Kwargs: %s" % kwargs)
+    except Exception as e:
+        logging.exception(e)
 
-    with open("/tmp/webhook.json", "w+") as dest:
-        dest.write(json.dumps({
-            "args": args,
-            "kwargs": kwargs
-        }))
-
-    return {"ok": True}
+    return {
+        "ok": True
+    }
