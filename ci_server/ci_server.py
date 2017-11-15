@@ -21,6 +21,13 @@ api.http.add_middleware(CORSMiddleware(api, allow_origins=["*"]))
 @hug.post('/deploy')
 def deploy(*args, **kwargs):
     print("Deploy called")
+
+    with open("/tmp/webhook.json", "w+") as dest:
+        dest.write(json.dumps({
+            "args": args,
+            "kwargs": kwargs
+        }))
+
     return {"ok": True}
 
 
