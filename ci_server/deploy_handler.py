@@ -23,7 +23,7 @@ class DeployHandler(object):
         deploy_data = kwargs.get("deploy_data")
 
         self.repository_name = deploy_data.get("repository", {}).get("name") if deploy_data else None
-        self.branch = deploy_data.get("ref", "").split("/").reverse()[0] if deploy_data else None
+        self.branch = deploy_data.get("ref", "").split("/")[::-1][0] if deploy_data else None
         self.time = deploy_data.get("head_commit", {}).get("timestamp") if deploy_data else None
         self.pusher = deploy_data.get("pusher") if deploy_data else None
 
@@ -31,7 +31,7 @@ class DeployHandler(object):
 
     def load_deploy_data(self, deploy_data):
         self.repository_name = deploy_data.get("repository", {}).get("name")
-        self.branch = deploy_data.get("ref", "").split("/").reverse()[0]
+        self.branch = deploy_data.get("ref", "").split("/")[::-1][0]
         self.pusher = deploy_data.get("pusher")
 
         self.other_data = get_other_data(deploy_data.get("repository"))
