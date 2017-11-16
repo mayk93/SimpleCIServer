@@ -18,8 +18,8 @@ api.http.add_middleware(CORSMiddleware(api, allow_origins=["https://github.com"]
 def deploy(*args, **kwargs):
     print("New Deploy at %s" % datetime.now())
     try:
-        print("Args: %s" % args)
-        print("Kwargs: %s" % kwargs)
+        print("Args: %s" % str(args))
+        print("Kwargs: %s" % str(kwargs))
     except Exception as e:
         logging.exception(e)
 
