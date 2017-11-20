@@ -54,6 +54,7 @@ class DeployHandler(object):
         '''.strip() % (
             self.repository_name,
             self.branch,
+            self.other_data["updated_at"],
             self.pusher,
 
             socket.gethostname()
