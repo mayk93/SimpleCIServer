@@ -25,49 +25,7 @@ else:
 
 @hug.post('/deploy')
 def deploy(*args, **kwargs):
-    print("New Deploy at %s" % datetime.now())
-    try:
-        print("Args:")
-    except Exception as e:
-        logging.exception(e)
-    try:
-        print(args)
-    except Exception as e:
-        logging.exception(e)
-    try:
-        print("Kwargs:")
-    except Exception as e:
-        logging.exception(e)
-    try:
-        print(kwargs)
-    except Exception as e:
-        logging.exception(e)
-    try:
-        print("\n---\n")
-    except Exception as e:
-        logging.exception(e)
-
-    try:
-        print(args.__class__.__name__)
-    except Exception as e:
-        logging.exception(e)
-
-    try:
-        print(len(args))
-    except Exception as e:
-        logging.exception(e)
-
-    try:
-        print(kwargs.__class__.__name__)
-    except Exception as e:
-        logging.exception(e)
-
-    try:
-        print(len(kwargs))
-    except Exception as e:
-        logging.exception(e)
-
-    print("\n=====\n\n")
+    logging.info("New deploy at %s" % datetime.now())
 
     deploy_handler.load_deploy_data(kwargs)
     deploy_handler.handle_update()
