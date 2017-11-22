@@ -28,31 +28,36 @@ class DeployHandler(object):
         with open(kwargs.get("deploy_config_path", "/home/deploy/ci_server/deploy_config.json")) as source:
             self.deploy_config = json.loads(source.read())
 
-        deploy_data = kwargs.get("deploy_data")
+        self.deploy_data = kwargs.get("deploy_data")
 
-        self.repository_name = deploy_data.get("repository", {}).get("name") if deploy_data else None
-        self.repository_path = os.path.join(
-            self.deploy_config["repo_path"], self.repository_name
-        ) if self.repository_name else None
-        self.repo = git.Repo(self.repository_path) if self.repository_path else None
-        self.deploy_branch = self.repo.create_remote('deploy', self.repo.remotes.deploy.url) if self.repo else None
+        self.repository_name = None
+        self.repository_path = None
+        self.repo = None
 
-        self.branch = deploy_data.get("ref", "").split("/")[::-1][0] if deploy_data else None
-        self.ref = deploy_data.get("ref") if deploy_data else None
-        self.time = deploy_data.get("head_commit", {}).get("timestamp") if deploy_data else None
-        self.pusher = deploy_data.get("pusher") if deploy_data else None
+        self.branch = None
+        self.ref = None
+        self.time = None
+        self.pusher = None
         self.other_data = None
+
+        self.remote = None
+
+        if self.deploy_data:
+            self.load_deploy_data(self.deploy_data)
+        else:
+            logging.info("No deploy data supplied. You must call load_deploy_data explicitly.")
 
     def load_deploy_data(self, deploy_data):
         self.repository_name = deploy_data.get("repository", {}).get("name")
         self.repository_path = os.path.join(self.deploy_config["repo_path"], self.repository_name)
         self.repo = git.Repo(self.repository_path)
-        self.deploy_branch = self.repo.create_remote('deploy', self.repo.remotes.deploy.url)
 
         self.branch = deploy_data.get("ref", "").split("/")[::-1][0]
         self.ref = deploy_data.get("ref")
         self.pusher = deploy_data.get("pusher")
         self.other_data = get_other_data(deploy_data.get("repository"))
+
+        self.remote = self.repo.create_remote(self.branch, self.repo.remotes.deploy.url)
 
     def handle_update(self):
         logging.info("Now updating for repo with data:")
@@ -63,7 +68,7 @@ class DeployHandler(object):
             logging.info("Found None in the required data.")
             return None
 
-        self.deploy_branch.pull()
+        self.remote.pull()
 
     def email(self):
         message = '''
