@@ -9,21 +9,10 @@ import git
 import logging
 logging.basicConfig(level=logging.INFO)
 
-
-def get_other_data(repo_data):
-    if repo_data is None:
-        return {
-            "updated_at": "unknown",
-            "size": "unknown"
-        }
-    return {
-        "updated_at": repo_data.get("updated_at", "unknown"),
-        "size": repo_data.get("size", "unknown")
-    }
+from deploy_handler_utils import get_other_data, VALUE
 
 
 class DeployHandler(object):
-    # ToDo: Duplicate data - fix this
     def __init__(self, **kwargs):
         with open(kwargs.get("deploy_config_path", "/home/deploy/ci_server/deploy_config.json")) as source:
             self.deploy_config = json.loads(source.read())
@@ -57,18 +46,18 @@ class DeployHandler(object):
         self.pusher = deploy_data.get("pusher")
         self.other_data = get_other_data(deploy_data.get("repository"))
 
-        self.remote = self.repo.create_remote(self.branch, self.repo.remotes.deploy.url)
+        self.remote = self.repo.create_remote(self.branch, self.repo.remotes.origin.url)
 
     def handle_update(self):
         logging.info("Now updating for repo with data:")
         logging.info("Name: %s" % self.repository_name)
         logging.info("Found in: %s" % self.repository_path)
 
-        if None in []:  # ToDo: Here, check to make sure there is no None in the required data.
+        if None in [attribute[VALUE] for attribute in self.__dict__.items() if attribute[:1] != '_']:
             logging.info("Found None in the required data.")
             return None
 
-        self.remote.pull()
+        self.remote.pull(self.branch)
 
     def email(self):
         message = '''
@@ -91,3 +80,17 @@ class DeployHandler(object):
         for email in self.deploy_config["email_to"]:
             print("Sending this email to %s" % email)
             print("\n-----\n%s\n-----\n" % message)
+
+
+import unittest
+
+
+class TestDeployHandler(unittest.TestCase):
+    def setUp(self):
+        self.dh = DeployHandler(deploy_config_path="deploy_config_test.json")
+
+        with open("test_data/example_hook_data_branch_local.json") as source:
+            self.test_deploy_data = json.loads(source.read())
+
+    def test_pull_to_deploy(self):
+        self.dh.load_deploy_data(self.test_deploy_data)
