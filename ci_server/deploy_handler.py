@@ -37,26 +37,43 @@ class DeployHandler(object):
             logging.info("No deploy data supplied. You must call load_deploy_data explicitly.")
 
     def load_deploy_data(self, deploy_data):
+        self.deploy_data = deploy_data
+
         self.repository_name = deploy_data.get("repository", {}).get("name")
         self.repository_path = os.path.join(self.deploy_config["repo_path"], self.repository_name)
         self.repo = git.Repo(self.repository_path)
 
         self.branch = deploy_data.get("ref", "").split("/")[::-1][0]
         self.ref = deploy_data.get("ref")
+        self.time = deploy_data.get("head_commit", {}).get("timestamp")
         self.pusher = deploy_data.get("pusher")
         self.other_data = get_other_data(deploy_data.get("repository"))
 
-        self.remote = self.repo.create_remote(self.branch, self.repo.remotes.origin.url)
+        self.remote = git.remote.Remote(self.repo, self.branch)
 
     def handle_update(self):
         logging.info("Now updating for repo with data:")
         logging.info("Name: %s" % self.repository_name)
         logging.info("Found in: %s" % self.repository_path)
 
-        if None in [attribute[VALUE] for attribute in self.__dict__.items() if attribute[:1] != '_']:
-            logging.info("Found None in the required data.")
+        attributes = [attribute[VALUE] for attribute in self.__dict__.items() if attribute[:1] != '_']
+
+        # for a in attributes:
+        #     print(a)
+        #     print(None is a)
+        #     print(a is None)
+        #     print("-----")
+        #
+        # print("=====")
+
+        if None in attributes:
+            logging.info("Found None in the required data:")
+            logging.info(attributes)
             return None
 
+        logging.info("Using remote %s to pull from branch %s" % (
+            self.remote, self.branch
+        ))
         self.remote.pull(self.branch)
 
     def email(self):
@@ -94,3 +111,4 @@ class TestDeployHandler(unittest.TestCase):
 
     def test_pull_to_deploy(self):
         self.dh.load_deploy_data(self.test_deploy_data)
+        self.dh.handle_update()
