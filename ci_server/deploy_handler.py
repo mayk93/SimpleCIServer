@@ -23,6 +23,7 @@ def get_other_data(repo_data):
 
 
 class DeployHandler(object):
+    # ToDo: Duplicate data - fix this
     def __init__(self, **kwargs):
         with open(kwargs.get("deploy_config_path", "/home/deploy/ci_server/deploy_config.json")) as source:
             self.deploy_config = json.loads(source.read())
@@ -30,25 +31,27 @@ class DeployHandler(object):
         deploy_data = kwargs.get("deploy_data")
 
         self.repository_name = deploy_data.get("repository", {}).get("name") if deploy_data else None
+        self.repository_path = os.path.join(
+            self.deploy_config["repo_path"], self.repository_name
+        ) if self.repository_name else None
+        self.repo = git.Repo(self.repository_path) if self.repository_path else None
+        self.deploy_branch = self.repo.create_remote('deploy', self.repo.remotes.deploy.url) if self.repo else None
+
         self.branch = deploy_data.get("ref", "").split("/")[::-1][0] if deploy_data else None
         self.ref = deploy_data.get("ref") if deploy_data else None
         self.time = deploy_data.get("head_commit", {}).get("timestamp") if deploy_data else None
         self.pusher = deploy_data.get("pusher") if deploy_data else None
-
-        self.repository_path = os.path.join(
-            self.deploy_config["repo_path"], self.repository_name
-        ) if self.repository_name else None
-
         self.other_data = None
 
     def load_deploy_data(self, deploy_data):
         self.repository_name = deploy_data.get("repository", {}).get("name")
+        self.repository_path = os.path.join(self.deploy_config["repo_path"], self.repository_name)
+        self.repo = git.Repo(self.repository_path)
+        self.deploy_branch = self.repo.create_remote('deploy', self.repo.remotes.deploy.url)
+
         self.branch = deploy_data.get("ref", "").split("/")[::-1][0]
         self.ref = deploy_data.get("ref")
         self.pusher = deploy_data.get("pusher")
-
-        self.repository_path = os.path.join(self.deploy_config["repo_path"], self.repository_name)
-
         self.other_data = get_other_data(deploy_data.get("repository"))
 
     def handle_update(self):
@@ -60,7 +63,7 @@ class DeployHandler(object):
             logging.info("Found None in the required data.")
             return None
 
-        git.remote.Remote(self.repository_name, 'origin').pull(self.ref)
+        self.deploy_branch.pull()
 
     def email(self):
         message = '''
