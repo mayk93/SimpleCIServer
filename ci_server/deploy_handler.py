@@ -52,6 +52,12 @@ class DeployHandler(object):
         self.remote = git.remote.Remote(self.repo, self.branch)
 
     def handle_update(self):
+        if self.branch not in self.deploy_config.get("update_for_branches", []):
+            logging.info("Branch %s is not updated by CI server. Update branches: %s" % (
+                self.branch, self.deploy_config.get("update_for_branches", [])
+            ))
+            return None
+
         logging.info("Now updating for repo with data:")
         logging.info("Name: %s" % self.repository_name)
         logging.info("Found in: %s" % self.repository_path)
