@@ -92,6 +92,9 @@ class DeployHandler(object):
             print("Sending this email to %s" % email)
             print("\n-----\n%s\n-----\n" % message)
 
+        with open("/tmp/deploy_email.txt", "w+") as destination:
+            destination.write(email)
+
 
 import unittest
 
