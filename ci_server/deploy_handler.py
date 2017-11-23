@@ -1,6 +1,7 @@
 import os
 import json
 import socket
+import subprocess
 
 # Git
 import git
@@ -76,6 +77,9 @@ class DeployHandler(object):
         ))
         self.remote.pull(self.branch)
 
+        if len(self.deploy_config.get("post_pull_hook", [])) > 0:
+            subprocess.call(self.deploy_config["post_pull_hook"])
+
     def email(self):
         message = '''
         A new deploy has occurred!
@@ -99,7 +103,7 @@ class DeployHandler(object):
             print("\n-----\n%s\n-----\n" % message)
 
         with open("/tmp/deploy_email.txt", "w+") as destination:
-            destination.write(email)
+            destination.write("Email list:\n%s\n\n%s" % (str(self.deploy_config["email_to"]), message))
 
 
 import unittest
