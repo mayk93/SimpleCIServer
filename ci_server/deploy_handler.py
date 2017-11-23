@@ -58,18 +58,12 @@ class DeployHandler(object):
 
         attributes = [attribute[VALUE] for attribute in self.__dict__.items() if attribute[:1] != '_']
 
-        # for a in attributes:
-        #     print(a)
-        #     print(None is a)
-        #     print(a is None)
-        #     print("-----")
-        #
-        # print("=====")
-
-        if None in attributes:
-            logging.info("Found None in the required data:")
-            logging.info(attributes)
-            return None
+        # Doing 'if None in attributes' will not work due to the Repo Object.
+        for attribute in attributes:
+            if attribute is None:
+                logging.info("Found None in the required data:")
+                logging.info(attributes)
+                return None
 
         logging.info("Using remote %s to pull from branch %s" % (
             self.remote, self.branch
