@@ -78,6 +78,7 @@ class DeployHandler(object):
         self.remote.pull(self.branch)
 
         if len(self.deploy_config.get("post_pull_hook", [])) > 0:
+            logging.info("Found a post pull hook: ", self.deploy_config["post_pull_hook"])
             subprocess.call(self.deploy_config["post_pull_hook"])
 
     def email(self):
@@ -103,7 +104,7 @@ class DeployHandler(object):
             print("\n-----\n%s\n-----\n" % message)
 
         with open("/tmp/deploy_email.txt", "w+") as destination:
-            destination.write("Email list:\n%s\n\n%s" % (str(self.deploy_config["email_to"]), message))
+            destination.write("Email list:\n%s\n\n%s\n-----\n" % (str(self.deploy_config["email_to"]), message))
 
 
 import unittest
