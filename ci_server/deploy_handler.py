@@ -49,7 +49,7 @@ class DeployHandler(object):
         self.pusher = deploy_data.get("pusher")
         self.other_data = get_other_data(deploy_data.get("repository"))
 
-        self.remote = git.remote.Remote(self.repo, self.branch)
+        self.remote = git.remote.Remote(self.repo, 'origin')
 
     def handle_update(self):
         if self.branch not in self.deploy_config.get("update_for_branches", []):
@@ -71,8 +71,8 @@ class DeployHandler(object):
                 logging.info(attributes)
                 return None
 
-        logging.info("Using remote %s to pull from branch %s" % (
-            self.remote, self.branch
+        logging.info("Using remote %s to pull from branch %s. Repo: %s" % (
+            self.remote, self.branch, self.repo
         ))
         self.remote.pull(self.branch)
 
