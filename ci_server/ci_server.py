@@ -28,8 +28,9 @@ def deploy(*args, **kwargs):
     logging.info("New deploy at %s" % datetime.now())
 
     deploy_handler.load_deploy_data(kwargs)
-    deploy_handler.handle_update()
-    deploy_handler.email()
+    handle_result = deploy_handler.handle_update()
+    if handle_result:
+        deploy_handler.email()
 
     return {
         "ok": True
