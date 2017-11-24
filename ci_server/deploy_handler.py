@@ -79,7 +79,10 @@ class DeployHandler(object):
 
         if len(self.deploy_config.get("post_pull_hook", [])) > 0:
             logging.info("Found a post pull hook: %s" % str(self.deploy_config["post_pull_hook"]))
-            subprocess.call(self.deploy_config["post_pull_hook"])
+            _ = subprocess.call(self.deploy_config["post_pull_hook"])
+            logging.info("Post pull hook result: %s" % str(_))
+
+        return True
 
     def email(self):
         message = '''
