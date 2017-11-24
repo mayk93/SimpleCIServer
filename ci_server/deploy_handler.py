@@ -3,6 +3,10 @@ import json
 import socket
 import subprocess
 
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 # Git
 import git
 
@@ -106,9 +110,30 @@ class DeployHandler(object):
             print("Sending this email to %s" % email)
             print("\n-----\n%s\n-----\n" % message)
 
+            self.send_email(email, message)
+
         with open("/tmp/deploy_email.txt", "w+") as destination:
             destination.write("Email list:\n%s\n\n%s\n-----\n" % (str(self.deploy_config["email_to"]), message))
 
+    def send_email(self, receiver, message_content):
+        sender = self.deploy_config["email_sender"]
+        sender_password = self.deploy_config["email_sender_password"]
+
+        message = MIMEMultipart()
+        message['From'] = sender
+        message['To'] = receiver
+        message['Subject'] = self.deploy_config["email_subject"]
+
+        message.attach(MIMEText(message_content, 'plain'))
+
+        server = smtplib.SMTP(self.deploy_config["smtp_server"], self.deploy_config["smtp_port"])
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(sender, sender_password)
+        text = message.as_string()
+
+        server.sendmail(sender, receiver, text)
 
 import unittest
 
@@ -123,3 +148,6 @@ class TestDeployHandler(unittest.TestCase):
     def test_pull_to_deploy(self):
         self.dh.load_deploy_data(self.test_deploy_data)
         self.dh.handle_update()
+
+    def test_send_email(self):
+        pass
