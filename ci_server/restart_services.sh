@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "Restart services hook."
+
 sudo service nginx stop
 sudo serivice api_server stop
 
