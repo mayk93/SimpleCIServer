@@ -104,6 +104,7 @@ class DeployHandler(object):
             self.pusher,
             socket.gethostname()
         )
+
         message = message.strip()
 
         for email in self.deploy_config["email_to"]:
@@ -148,5 +149,5 @@ class TestDeployHandler(unittest.TestCase):
         self.dh.load_deploy_data(self.test_deploy_data)
         self.dh.handle_update()
 
-    def test_send_email(self):
-        pass
+    # def test_send_email(self):
+    #     self.dh.send_email()
