@@ -111,8 +111,8 @@ class DeployHandler(object):
             print("\n-----\n%s\n-----\n" % message)
             self.send_email(email, message)
 
-        with open("/tmp/deploy_email.txt", "w+") as destination:
-            destination.write("Email list:\n%s\n\n%s\n-----\n" % (str(self.deploy_config["email_to"]), message))
+        # with open("/tmp/deploy_email.txt", "w+") as destination:
+        #     destination.write("Email list:\n%s\n\n%s\n-----\n" % (str(self.deploy_config["email_to"]), message))
 
     def send_email(self, receiver, message_content):
         sender = self.deploy_config["email_sender"]
